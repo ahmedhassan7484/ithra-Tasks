@@ -1,0 +1,6 @@
+@ithra_backend_HostAddress = http://localhost:5298
+
+GET {{ithra_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
