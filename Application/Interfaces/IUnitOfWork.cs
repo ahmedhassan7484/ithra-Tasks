@@ -11,6 +11,7 @@ namespace Application.Interfaces
         IProductRepository Products { get; }
 
         IOrderRepository Orders { get; }
+        IUserRepository Users { get; }
 
         Task<int> SaveChangesAsync();
     }

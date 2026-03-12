@@ -2,6 +2,7 @@
 using Application.Features.Products.Commands;
 using Application.Features.Products.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +18,14 @@ namespace ithra_backend.Controllers
             _mediator = mediator;
         }
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetProducts()
         {
             var result = await _mediator.Send(new GetProductsQuery());
             return Ok(result);
         }
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateProduct(productResponseDto dto)
         {
             var result = await _mediator.Send(new CreateProductCommand(dto));

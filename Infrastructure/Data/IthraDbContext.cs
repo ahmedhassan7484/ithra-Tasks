@@ -27,6 +27,31 @@ namespace Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
+
+            modelBuilder.Entity<ApplicationUser>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Username)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Email)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.PasswordHash)
+                    .IsRequired();
+
+                
+
+                entity.HasIndex(e => e.Email)
+                    .IsUnique();
+
+                entity.HasIndex(e => e.Username)
+                    .IsUnique();
+            });
+
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.Items)
                 .WithOne(i => i.Order)

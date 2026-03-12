@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Features.Orders.Commands;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,7 @@ namespace ithra_backend.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateOrder(CreateOrderRequestDto request)
         {
             var result = await _mediator.Send(new CreateOrderCommand(request));

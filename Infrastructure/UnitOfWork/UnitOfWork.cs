@@ -12,10 +12,12 @@ namespace Infrastructure.UnitOfWork
     {
         private readonly IthraDbContext _context;
         public IProductRepository Products { get; set; }
+        public IUserRepository Users { get; set; }
         public IOrderRepository Orders { get; set; }
         public UnitOfWork(
             IthraDbContext context,
             IProductRepository productRepository,
+            IUserRepository users,
             IOrderRepository orderRepository
             )
         
@@ -23,6 +25,7 @@ namespace Infrastructure.UnitOfWork
             _context = context;
             Products = productRepository;
             Orders = orderRepository;
+            Users = users;
         }
 
         public async Task<int> SaveChangesAsync()
