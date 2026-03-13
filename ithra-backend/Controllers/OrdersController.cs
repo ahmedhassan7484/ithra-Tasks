@@ -17,7 +17,11 @@ namespace ithra_backend.Controllers
         {
             _mediator = mediator;
         }
-
+        /// <summary>
+        /// Create a new order for a user. The request should include the user ID and a list of items with their quantities. The response will contain the order ID, total amount, discount applied, and details of the ordered items.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> CreateOrder(CreateOrderRequestDto request)

@@ -24,9 +24,9 @@ namespace Infrastructure.Repositories
             await _context.Products.AddAsync(product);
         }
 
-        public Task<List<Product>> GetAllAsync()
+        public async Task<IQueryable<Product>> GetAllAsync()
         {
-            return _context.Products.ToListAsync();
+            return _context.Products.AsQueryable();
         }
         public async Task<Product?> GetByIdAsync(int id)
         {

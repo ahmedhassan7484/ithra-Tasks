@@ -1,4 +1,5 @@
-﻿using Application.DTOs;
+﻿using Application.Common;
+using Application.DTOs;
 using Application.Interfaces;
 using MediatR;
 using System;
@@ -9,28 +10,65 @@ using System.Threading.Tasks;
 
 namespace Application.Features.Products.Queries
 {
-    public class GetProductsQueryHandler:IRequestHandler<GetProductsQuery,List<ProductDto>>
+    public class GetProductsQueryHandler:IRequestHandler<GetProductsQuery,PageResult<productResponseDto>>
     {
-        private readonly IProductRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GetProductsQueryHandler(IProductRepository repository)
+        public GetProductsQueryHandler(IUnitOfWork unitOfWork)
         {
-            _repository = repository;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ProductDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+        public async Task<PageResult<productResponseDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
         {
-            var products = await _repository.GetAllAsync();
+            var query = await _unitOfWork.Products.GetAllAsync();
 
-            return products.Select(p => new ProductDto
+            // Search
+            if (!string.IsNullOrEmpty(request.Filter.Search))
             {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                StockQuantity = p.StockQuantity,
-                Category = p.Category
-            }).ToList();
+                query =  query.Where(p => p.Name.Contains(request.Filter.Search));
+            }
+
+            // Filter by Category
+            if (!string.IsNullOrEmpty(request.Filter.Category))
+            {
+                query = query.Where(p => p.Category == request.Filter.Category);
+            }
+
+            // Sorting
+            if (!string.IsNullOrEmpty(request.Filter.SortBy))
+            {
+                if (request.Filter.SortBy.ToLower() == "price")
+                {
+                    query = request.Filter.SortDirection == "desc"
+                        ? query.OrderByDescending(p => p.Price)
+                        : query.OrderBy(p => p.Price);
+                }
+            }
+
+            // Pagination
+            var products =  query
+                .Skip((request.Filter.Page - 1) * request.Filter.PageSize)
+                .Take(request.Filter.PageSize)
+                .Select(p => new productResponseDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Category = p.Category
+                })
+                .AsEnumerable();
+            var totalCount =  query.Count();
+
+            return new PageResult<productResponseDto>
+            {
+                Page = request.Filter.Page,
+                PageSize = request.Filter.PageSize,
+                TotalCount = totalCount,
+                Data = products
+            };
         }
+
+        
     }
 }
