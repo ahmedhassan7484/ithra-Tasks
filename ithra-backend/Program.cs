@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Infrastructure.UnitOfWork;
+using ithra_backend.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -51,8 +52,9 @@ namespace ithra_backend
                 }
             });
             });
+            // Add SignalR
+            builder.Services.AddSignalR();
 
-            
             //db context 
             builder.Services.AddDbContext<IthraDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -127,7 +129,7 @@ namespace ithra_backend
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.MapHub<NotificationHub>("/notifications");
 
             app.MapControllers();
 

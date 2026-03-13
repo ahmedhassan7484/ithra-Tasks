@@ -1,7 +1,9 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
 using Domain.Entities;
+using ithra_backend.Hubs;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +16,14 @@ namespace Application.Features.Orders.Commands
     {
         //private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
-        //private readonly IOrderRepository _orderRepository;
+        private readonly IHubContext<NotificationHub> _hub;
 
-        public CreateOrderCommandHandler(IUnitOfWork unitOfWork)
+        public CreateOrderCommandHandler(IUnitOfWork unitOfWork, IHubContext<NotificationHub> hub)
         {
             //_productRepository = productRepository;
-            //_orderRepository = orderRepository;
+        
             _unitOfWork = unitOfWork;
+            _hub = hub;
         }
 
         public async Task<OrderResponseDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -37,10 +40,16 @@ namespace Application.Features.Orders.Commands
                 var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
 
                 if (product == null)
+                {
+                    await _hub.Clients.User(order.UserId.ToString()).SendAsync("ReceiveNotification", $"Product not found");
                     throw new Exception("Product not found");
+                }
 
                 if (product.StockQuantity < item.Quantity)
+                {
+                    await _hub.Clients.User(order.UserId.ToString()).SendAsync("ReceiveNotification", $"Insufficient stock for {product.Name}");
                     throw new Exception($"Insufficient stock for {product.Name}");
+                }
 
                 product.StockQuantity -= item.Quantity;
 
@@ -67,7 +76,10 @@ namespace Application.Features.Orders.Commands
             order.Discount = discount;
 
             await _unitOfWork.Orders.AddAsync(order);
-            await _unitOfWork.SaveChangesAsync();   
+            await _unitOfWork.SaveChangesAsync();
+            //send notification 
+            await _hub.Clients.All.SendAsync("ReceiveNotification", $"New order created with ID: {order.Id}");
+
             return new OrderResponseDto
             {
                 OrderId = order.Id,
@@ -75,7 +87,7 @@ namespace Application.Features.Orders.Commands
                 Discount = discount,
                 Items = order.Items.Select(i => new OrderItemResponseDto
                 {
-                    ProductName = "",
+                    ProductName = i.Product.Name,
                     Quantity = i.Quantity,
                     Price = i.UnitPrice
                 }).ToList()
