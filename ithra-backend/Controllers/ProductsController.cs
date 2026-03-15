@@ -26,7 +26,7 @@ namespace ithra_backend.Controllers
         /// price range, and availability status. Cannot be null.</param>
         /// <returns>An IActionResult containing the filtered list of products. Returns a 200 OK response with the product data
         /// if successful.</returns>
-        [HttpGet]
+        [HttpGet("GetProducts")]
         [Authorize]
         public async Task<IActionResult> GetProducts([FromQuery] ProductFilterDto filter)
         {
@@ -42,7 +42,7 @@ namespace ithra_backend.Controllers
         /// should include all required product information.</param>
         /// <returns>An IActionResult that represents the result of the product creation operation. Returns an OK response with
         /// the created product details if the operation is successful.</returns>
-        [HttpPost]
+        [HttpPost("CreateProduct")]
         [Authorize]
         public async Task<IActionResult> CreateProduct(productResponseDto dto)
         {

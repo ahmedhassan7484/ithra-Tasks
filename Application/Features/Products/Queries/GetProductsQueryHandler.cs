@@ -38,7 +38,7 @@ namespace Application.Features.Products.Queries
             // Sorting
             if (!string.IsNullOrEmpty(request.Filter.SortBy))
             {
-                if (request.Filter.SortBy.ToLower() == "price")
+                if (request.Filter.SortBy.ToLower() == "desc")
                 {
                     query = request.Filter.SortDirection == "desc"
                         ? query.OrderByDescending(p => p.Price)

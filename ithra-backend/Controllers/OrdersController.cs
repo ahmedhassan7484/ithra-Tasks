@@ -22,7 +22,7 @@ namespace ithra_backend.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost("CreateOrder")]
         [Authorize]
         public async Task<IActionResult> CreateOrder(CreateOrderRequestDto request)
         {
